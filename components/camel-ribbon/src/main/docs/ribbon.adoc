@@ -1,0 +1,73 @@
+## Ribbon
+
+*Available as of Camel version 2.18*
+
+Camel Ribbon provides a Camel's cloud LoadBalancer implementaion based on NetflixOSS Ribbon to be used by the Service Call EIP.
+
+Maven users will need to add the following dependency to their pom.xml for this component:
+
+[source,xml]
+-------------------------------------------------
+<dependency>
+    <groupId>org.apache.camel</groupId>
+    <artifactId>camel-ribbon</artifactId>
+    <version>${camel-version}</version>
+</dependency>
+-------------------------------------------------
+
+#### Configuration
+
+* *Programmatic*
++
+[source,java]
+.Route
+-------------------------------------------------------------------------------------------------------------------
+    RibbonConfiguration configuration = new RibbonConfiguration();
+    configuration.setClientConfig(Collections.singletonMap("ServerListRefreshInterval", "250"));
+
+    RibbonLoadBalancer loadBalancer = new RibbonLoadBalancer(configuration);
+
+    from("direct:start")
+        .serviceCall()
+            .name("myService")
+            .loadBalancer(loadBalancer)
+            .consulServiceDiscovery()
+            .end()
+        .to("mock:result");
+-------------------------------------------------------------------------------------------------------------------
+
+* *Spring Boot*
++
+[source,properties]
+.application.properties
+-------------------------------------------------------------------------------------------------------------------
+camel.cloud.ribbon.client-config[ServerListRefreshInterval] = 250
+-------------------------------------------------------------------------------------------------------------------
++
+[source,java]
+.Route
+-------------------------------------------------------------------------------------------------------------------
+    from("direct:start")
+        .serviceCall()
+            .name("myService")
+            .ribbonLoadBalancer()
+            .consulServiceDiscovery()
+            .end()
+        .to("mock:result");
+-------------------------------------------------------------------------------------------------------------------
+
+* *XML*
++
+[source,xml]
+.Route
+-------------------------------------------------------------------------------------------------------------------
+<route>
+    <from uri="direct:start"/>
+    <serviceCall name="myService">
+        <!-- enable ribbon load balancer -->
+        <ribbonLoadBalancer>
+            <properties key="ServerListRefreshInterval" value="250"/>
+        </ribbonLoadBalancer>
+    </serviceCall>
+</route>
+-------------------------------------------------------------------------------------------------------------------
